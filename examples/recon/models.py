@@ -151,3 +151,26 @@ class Model(nn.Module):
             return self.render_multiview(images[0], images[1], viewpoints[0], viewpoints[1])
         elif task == 'test':
             return self.evaluate_iou(images, voxels)
+
+
+
+import argparse
+if __name__ == '__main__':
+    IMAGE_SIZE = 64
+    BATCH_SIZE = 64
+    SIGMA_VAL = 1e-4
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-is', '--image-size', type=int, default=IMAGE_SIZE)
+    parser.add_argument('-b', '--batch-size', type=int, default=BATCH_SIZE)
+    parser.add_argument('-sv', '--sigma-val', type=float, default=SIGMA_VAL)
+    args = parser.parse_args()
+
+    model = Model('data/obj/sphere/sphere_642.obj', args=args)
+    model = model.cuda()
+
+    CLASS_IDS_ALL = (
+    '02691156')
+
+    # dataset_train = ShapeNet("data/datasets", CLASS_IDS_ALL.split(','), 'train')
+

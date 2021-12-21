@@ -81,8 +81,10 @@ class ShapeNet(object):
         images_b = torch.from_numpy(self.images[data_ids_b].astype('float32') / 255.)
 
         distances = torch.ones(batch_size).float() * self.distance
+
         elevations_a = torch.ones(batch_size).float() * self.elevation
         elevations_b = torch.ones(batch_size).float() * self.elevation
+        
         viewpoints_a = srf.get_points_from_angles(distances, elevations_a, -viewpoint_ids_a * 15)
         viewpoints_b = srf.get_points_from_angles(distances, elevations_b, -viewpoint_ids_b * 15)
 

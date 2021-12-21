@@ -19,12 +19,12 @@ CLASS_IDS_ALL = (
     '02691156,02828884,02933112,02958343,03001627,03211117,03636649,' +
     '03691459,04090263,04256520,04379243,04401088,04530566')
 
-PRINT_FREQ = 100
+PRINT_FREQ = 5
 SAVE_FREQ = 100
 
-MODEL_DIRECTORY = './data/models'
-DATASET_DIRECTORY = './data/datasets'
-
+MODEL_DIRECTORY = 'results/models/checkpoint_0004999.pth.tar'
+DATASET_DIRECTORY = 'data/datasets'
+modelname = "checkpoint_0001999.pth.tar"
 SIGMA_VAL = 0.01
 IMAGE_PATH = ''
 
@@ -53,16 +53,24 @@ else:
     model = models.Model('data/obj/sphere/sphere_642.obj', args=args)
 model = model.cuda()
 
-state_dicts = torch.load(args.model_directory)
+
+print("model_directory: ", args.model_directory)
+current_dir = os.path.dirname(os.path.realpath(__file__))
+real_dir = os.path.join(current_dir, 'results', 'models', modelname)
+
+state_dicts = torch.load(real_dir)
 # import ipdb; ipdb.set_trace()
 model.load_state_dict(state_dicts['model'], strict=True)
 model.eval()
 
 dataset_val = datasets.ShapeNet(args.dataset_directory, args.class_ids.split(','), 'val')
 
-directory_output = './data/results/test'
+directory_output = 'data/results/test'
+
+# directory_output = os.path.join(args.model_directory)
+print("directory output: ", directory_output)
 os.makedirs(directory_output, exist_ok=True)
-directory_mesh = os.path.join(directory_output, args.experiment_id)
+directory_mesh = os.path.join(directory_output, 'ex4')
 os.makedirs(directory_mesh, exist_ok=True)
 
 
@@ -84,8 +92,10 @@ def test():
 
         for i, (im, vx) in enumerate(dataset_val.get_all_batches_for_evaluation(args.batch_size, class_id)):
             images = torch.autograd.Variable(im).cuda()
+            print(images.shape)
             voxels = vx.numpy()
-
+            print("images: ", images.shape)
+            print("voxels: ", voxels.shape)
             batch_iou, vertices, faces = model(images, voxels=voxels, task='test')
             iou += batch_iou.sum()
 
@@ -106,8 +116,8 @@ def test():
                 print('Iter: [{0}/{1}]\t'
                       'Time {batch_time.val:.3f}\t'
                       'IoU {2:.3f}\t'.format(i, ((dataset_val.num_data[class_id] * 24) // args.batch_size),
-                                             batch_iou.mean(),
-                                             batch_time=batch_time))
+                                            batch_iou.mean(),
+                                            batch_time=batch_time))
 
         iou_cls = iou / 24. / dataset_val.num_data[class_id] * 100
         iou_all.append(iou_cls)

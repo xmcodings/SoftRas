@@ -114,4 +114,6 @@ examples/recon/demo.py
 examples/recon/script.sh
 examples/test
 
+*.tar
+
 .DS_Store

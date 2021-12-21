@@ -15,7 +15,7 @@ import argparse
 import soft_renderer as sr
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
-data_dir = os.path.join(current_dir, '../data')
+data_dir = os.path.join(current_dir, 'data')
 
 
 class Model(nn.Module):
@@ -84,13 +84,15 @@ def main():
     cameras = np.load(args.camera_input).astype('float32')
     optimizer = torch.optim.Adam(model.parameters(), 0.01, betas=(0.5, 0.99))
 
+    print("images: ", images)
+    print("cameras: ", cameras)
     camera_distances = torch.from_numpy(cameras[:, 0])
     elevations = torch.from_numpy(cameras[:, 1])
     viewpoints = torch.from_numpy(cameras[:, 2])
     transform.set_eyes_from_angles(camera_distances, elevations, viewpoints)
 
     loop = tqdm.tqdm(list(range(0, 2000)))
-    writer = imageio.get_writer(os.path.join(args.output_dir, 'deform.gif'), mode='I')
+    writer = imageio.get_writer(os.path.join(args.output_dir, 'cube_deform.gif'), mode='I')
     for i in loop:
         images_gt = torch.from_numpy(images).cuda()
 
@@ -119,7 +121,7 @@ def main():
             imageio.imsave(os.path.join(args.output_dir, 'deform_%05d.png' % i), (255*image[..., -1]).astype(np.uint8))
 
     # save optimized mesh
-    model(1)[0].save_obj(os.path.join(args.output_dir, 'plane.obj'), save_texture=False)
+    model(1)[0].save_obj(os.path.join(args.output_dir, 'saved_plane.obj'), save_texture=False)
 
 
 if __name__ == '__main__':

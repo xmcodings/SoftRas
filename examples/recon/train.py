@@ -11,25 +11,29 @@ import models
 import imageio
 import time
 import os
+from matplotlib import pyplot as plt
+
+# CLASS_IDS_ALL = (
+#     '02691156,02828884,02933112,02958343,03001627,03211117,03636649,' +
+#     '03691459,04090263,04256520,04379243,04401088,04530566')
 
 CLASS_IDS_ALL = (
-    '02691156,02828884,02933112,02958343,03001627,03211117,03636649,' +
-    '03691459,04090263,04256520,04379243,04401088,04530566')
+    '02691156')
 
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-4
 LR_TYPE = 'step'
-NUM_ITERATIONS = 250000
+NUM_ITERATIONS = 5000
 
 LAMBDA_LAPLACIAN = 5e-3
 LAMBDA_FLATTEN = 5e-4
 
-PRINT_FREQ = 100
-DEMO_FREQ = 1000
-SAVE_FREQ = 10000
+PRINT_FREQ = 200
+DEMO_FREQ = 1700
+SAVE_FREQ = 1999
 RANDOM_SEED = 0
 
-MODEL_DIRECTORY = 'data/results/models'
+MODEL_DIRECTORY = 'results/models'
 DATASET_DIRECTORY = 'data/datasets'
 
 IMAGE_SIZE = 64
@@ -66,8 +70,9 @@ torch.backends.cudnn.deterministic = True
 torch.manual_seed(args.seed)
 torch.cuda.manual_seed_all(args.seed)
 np.random.seed(args.seed)
-
-directory_output = os.path.join(args.model_directory, args.experiment_id)
+print("train args: ", args)
+directory_output = os.path.join(args.model_directory)
+print("output dir: ", directory_output)
 os.makedirs(directory_output, exist_ok=True)
 image_output = os.path.join(directory_output, 'pic')
 os.makedirs(image_output, exist_ok=True)
@@ -94,6 +99,8 @@ def train():
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
+    
+    loss_history = []
 
     for i in range(start_iter, args.num_iterations + 1):
         # adjust learning rate and sigma_val (decay after 150k iter)
@@ -155,6 +162,12 @@ def train():
                   'sv {sv:.6f}\t'.format(i, args.num_iterations,
                                          batch_time=batch_time, loss=losses,
                                          lr=lr, sv=model.rasterizer.sigma_val))
+
+        loss_history.append(losses.val)
+    
+    plt.plot(loss_history)
+    plt.savefig('fooot5000.png')
+
 
 
 def adjust_learning_rate(optimizers, learning_rate, i, method):
